@@ -1,46 +1,73 @@
 package sportdirect;
 
+import org.junit.jupiter.api.Assertions;
+import org.openqa.selenium.By;
+
 public class Test {
 
     private BaseFunc baseFunc = new BaseFunc();
     private final String HOME_PAGE = "lv.sportsdirect.com";
+    private final By WOMENS_CHECKED_FILTER = By.xpath(".//div[@data-productname='Womens']/a/span");
+    private final By COLOUR_CHECKED_FILTER = By.xpath(".//div[@data-productname='White']/a/span");
+    private final By SIZE_CHECKED_FILTER = By.xpath(".//div[@data-productname='4.5']/a/span");
+    private final By BAG_QUANTITY = By.xpath(".//span[@id='bagQuantity']");
 
     @org.junit.jupiter.api.Test
     public void SearchTest(){
 
-        // Open Chrome browser and go to lv.sportsdirect.com
+        // Home page
         baseFunc.goToUrl(HOME_PAGE);
         HomePage homePage = new HomePage(baseFunc);
 
-        // Type in search input field "Shoes", wait while suggest items are shows and choose "Shoes"
+        //Shoe page
         ShoePage shoePage = homePage.getItemByName("Shoes");
-        // Choose filter by gender --> Women
+
         shoePage.filterItem("Womens", shoePage.FILTER_LIST_ITEM_GENDER);
-        // Wait while all women shoes are loaded on the page
+        String woman_filter_expected = baseFunc.browser.findElement(WOMENS_CHECKED_FILTER).getAttribute("aria-checked");
+        Assertions.assertEquals(woman_filter_expected, "true");
+        System.out.println("AssertEquals Women Filter Passed\n");
+        
         shoePage.waitForProductLoad();
-        // Choose filter by color --> White
+
         shoePage.filterItem("White", shoePage.FILTER_LIST_ITEM_COLOUR);
-        // Wait while all white shoes are loaded on the page
+        String colour_filter_expected = baseFunc.browser.findElement(COLOUR_CHECKED_FILTER).getAttribute("aria-checked");
+        Assertions.assertEquals(colour_filter_expected, "true");
+        System.out.println("AssertEquals Colour Filter Passed\n");
+
         shoePage.waitForProductLoad();
-        // Choose filter by size --> 4.5
+
         shoePage.filterItem("4.5", shoePage.FILTER_LIST_ITEM_SIZE);
-        // Wait while all 4.5 size shoes are loaded on the page
+        String size_filter_expected = baseFunc.browser.findElement(SIZE_CHECKED_FILTER).getAttribute("aria-checked");
+        Assertions.assertEquals(size_filter_expected, "true");
+        System.out.println("AssertEquals Size Filter Passed\n");
+
         shoePage.waitForProductLoad();
 
-        // Take first item and click on it
+        // Item page
         ItemPage itemPage = shoePage.choiceItem(0);
-        // Choose size 4.5
         itemPage.chooseSize("4.5");
-        // Press add to cart button
+        baseFunc.closeBanner();
         itemPage.addToCart();
+        itemPage.waitForCartLoad();
 
-        // Type in search input field "Socks" and press Enter
+        String cartItems = baseFunc.browser.findElement(BAG_QUANTITY).getText();
+        Assertions.assertEquals(cartItems, "1");
+        System.out.println("Item 1 adding to cart Passed\n");
+
         homePage.getItemByName("Socks");
-        // Take third item and click on it
         ItemPage socksPage = shoePage.choiceItem(2);
-        // Press add to cart button
+        baseFunc.closeBanner();
+
         socksPage.addToCart();
-        // Open cart page
+        itemPage.waitForCartLoad();
+
+        String cartItems2 = baseFunc.browser.findElement(BAG_QUANTITY).getText();
+        Assertions.assertEquals(cartItems2, "2");
+        System.out.println("Item 2 adding to cart Passed\n");
+
+        // Cart page
         homePage.bagContainer();
+        baseFunc.browser.close();
     }
+
 }
